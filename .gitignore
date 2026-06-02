@@ -1,0 +1,21 @@
+# Build outputs
+build_output/
+dist/
+build/
+*.spec
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Logs
+logs/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,49 @@
+{
+  "threshold": 0.6,
+  "baseline_width": 1920,
+  "baseline_height": 1080,
+  "actions": [
+    {
+      "name": "button_1",
+      "post_delay": 1.0,
+      "template": "C:\\Users\\User\\Desktop\\Games Bot\\templates\\button_1.png",
+      "timeout": 1
+    },
+    {
+      "name": "button_2",
+      "post_delay": 1.0,
+      "template": "C:\\Users\\User\\Desktop\\Games Bot\\templates\\button_2.png",
+      "timeout": 1
+    },
+    {
+      "name": "button_3",
+      "post_delay": 1.0,
+      "template": "C:\\Users\\User\\Desktop\\Games Bot\\templates\\button_3.png",
+      "timeout": 1
+    },
+    {
+      "name": "button_4",
+      "post_delay": 1.0,
+      "template": "C:\\Users\\User\\Desktop\\Games Bot\\templates\\button_4.png",
+      "timeout": 1
+    },
+    {
+      "name": "button_5",
+      "post_delay": 1.0,
+      "template": "C:\\Users\\User\\Desktop\\Games Bot\\templates\\button_5.png",
+      "timeout": 1
+    },
+    {
+      "name": "button_6",
+      "post_delay": 1.0,
+      "template": "C:\\Users\\User\\Desktop\\Games Bot\\templates\\button_6.png",
+      "timeout": 1
+    }
+  ],
+  "round_interval": 30,
+  "window_geometry": {
+    "x": 2155,
+    "y": 236,
+    "collapsed": false
+  }
+}
