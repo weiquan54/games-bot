@@ -4,9 +4,14 @@ import sys
 import os
 import logging
 
-# Ensure project root is on path
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Resolve base dir: works for both dev (`python main.py`) and PyInstaller exe
+if getattr(sys, 'frozen', False):
+    BASE_DIR = sys._MEIPASS
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+os.chdir(BASE_DIR)
+sys.path.insert(0, BASE_DIR)
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
@@ -17,7 +22,7 @@ from ui.floating_window import FloatingWindow
 
 
 def setup_logging():
-    log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+    log_dir = os.path.join(BASE_DIR, "logs")
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, "game_bot.log")
 
@@ -39,9 +44,8 @@ def main():
     setup_logging()
     logger = logging.getLogger("main")
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    config = ConfigManager(base_dir)
-    engine = ClickEngine(config)
+    config = ConfigManager(BASE_DIR)
+    engine = ClickEngine(config, BASE_DIR)
 
     # Pre-load all templates
     actions = config.actions

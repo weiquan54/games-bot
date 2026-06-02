@@ -2,6 +2,7 @@
 
 import time
 import logging
+import os
 import threading
 import traceback
 from pathlib import Path
@@ -23,8 +24,9 @@ logger = logging.getLogger("clicker")
 
 
 class ClickEngine:
-    def __init__(self, config: ConfigManager):
+    def __init__(self, config: ConfigManager, base_dir: str = None):
         self.config = config
+        self.base_dir = base_dir
         self._running = False
         self._thread: threading.Thread | None = None
         self._stop_event = threading.Event()
@@ -41,6 +43,14 @@ class ClickEngine:
         self._templates.clear()
         for action in self.config.actions:
             path = action["template"]
+            # If running as PyInstaller bundle, resolve path relative to base_dir
+            if self.base_dir and not os.path.isabs(path):
+                path = os.path.join(self.base_dir, path)
+            # Also try relative to base_dir even if path is absolute (exe fallback)
+            if not os.path.exists(path) and self.base_dir:
+                alt = os.path.join(self.base_dir, "templates", os.path.basename(path))
+                if os.path.exists(alt):
+                    path = alt
             img = cv2.imread(path, cv2.IMREAD_COLOR)
             if img is not None:
                 self._templates[path] = img
