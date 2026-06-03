@@ -269,14 +269,19 @@ class ClickEngine:
                     logger.warning(f"Screen still off after wake (attempt {wake_attempt+1}/5)")
                 if self._stop_event.is_set():
                     break
-                # Screen is back on — dismiss any overlays, then bring game to foreground
-                win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
+                # Screen is on — aggressively dismiss any login/lock overlays
+                for _ in range(3):
+                    win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
+                    time.sleep(0.1)
+                    win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
+                    time.sleep(0.4)
+                win32api.keybd_event(win32con.VK_SPACE, 0, 0, 0)
                 time.sleep(0.1)
-                win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
-                time.sleep(0.5)
-                win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
+                win32api.keybd_event(win32con.VK_SPACE, 0, win32con.KEYEVENTF_KEYUP, 0)
+                time.sleep(0.4)
+                win32api.keybd_event(win32con.VK_ESCAPE, 0, 0, 0)
                 time.sleep(0.1)
-                win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
+                win32api.keybd_event(win32con.VK_ESCAPE, 0, win32con.KEYEVENTF_KEYUP, 0)
                 time.sleep(0.5)
                 self._activate_window()
                 self._stop_event.wait(1.0)
