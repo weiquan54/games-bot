@@ -293,22 +293,27 @@ class ClickEngine:
             self._allow_lock()
 
     def _wake_display(self):
-        """Wake up display — use monitor power command + key events as backup."""
+        """Wake up display — temporarily override AwayMode to force screen on."""
         try:
-            # Primary: SC_MONITORPOWER -1 tells the monitor to turn ON
-            HWND_BROADCAST = 0xFFFF
-            WM_SYSCOMMAND = 0x0112
-            SC_MONITORPOWER = 0xF170
-            ctypes.windll.user32.PostMessageW(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1)
-            time.sleep(0.5)
-            # Backup: key injection for systems where monitor command isn't enough
+            ES_CONTINUOUS = 0x80000000
+            ES_SYSTEM_REQUIRED = 0x00000001
+            ES_DISPLAY_REQUIRED = 0x00000002
+            # Temporarily force display ON (overrides AwayMode)
+            ctypes.windll.kernel32.SetThreadExecutionState(
+                ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED
+            )
+            time.sleep(1.0)
+            # Also send key events as backup
             win32api.keybd_event(win32con.VK_SCROLL, 0, 0, 0)
             time.sleep(0.05)
             win32api.keybd_event(win32con.VK_SCROLL, 0, win32con.KEYEVENTF_KEYUP, 0)
-            time.sleep(0.1)
-            win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
-            time.sleep(0.05)
-            win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
+            # Wait for display to stabilize
+            time.sleep(2.0)
+            # Restore AwayMode so screen can sleep again later
+            ES_AWAYMODE_REQUIRED = 0x00000040
+            ctypes.windll.kernel32.SetThreadExecutionState(
+                ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED
+            )
         except Exception as e:
             logger.warning(f"Wake display failed: {e}")
 
