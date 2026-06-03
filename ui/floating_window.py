@@ -200,6 +200,14 @@ class FloatingWindow(QWidget):
 
     def _restore_geometry(self):
         x, y = self.config.window_pos
+        # Clamp to visible area (window can get lost if monitor unplugged)
+        screen = QApplication.primaryScreen()
+        if screen:
+            geo = screen.availableGeometry()
+            if x < geo.x() or x > geo.x() + geo.width() - 100:
+                x = geo.x() + 100
+            if y < geo.y() or y > geo.y() + geo.height() - 100:
+                y = geo.y() + 100
         self.move(x, y)
 
     # ---- Collapse / Expand ----

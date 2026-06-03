@@ -288,8 +288,15 @@ class ClickEngine:
             self._allow_lock()
 
     def _wake_display(self):
-        """Wake up display by sending harmless key events (won't affect any apps)."""
+        """Wake up display — use monitor power command + key events as backup."""
         try:
+            # Primary: SC_MONITORPOWER -1 tells the monitor to turn ON
+            HWND_BROADCAST = 0xFFFF
+            WM_SYSCOMMAND = 0x0112
+            SC_MONITORPOWER = 0xF170
+            ctypes.windll.user32.PostMessageW(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1)
+            time.sleep(0.5)
+            # Backup: key injection for systems where monitor command isn't enough
             win32api.keybd_event(win32con.VK_SCROLL, 0, 0, 0)
             time.sleep(0.05)
             win32api.keybd_event(win32con.VK_SCROLL, 0, win32con.KEYEVENTF_KEYUP, 0)
