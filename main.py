@@ -3,15 +3,19 @@
 import sys
 import os
 import logging
+import shutil
 
 # Resolve base dir: works for both dev (`python main.py`) and PyInstaller exe
 if getattr(sys, 'frozen', False):
-    BASE_DIR = sys._MEIPASS
+    # PyInstaller bundle: resources in _MEIPASS, logs/config next to exe
+    RES_DIR = sys._MEIPASS
+    WORK_DIR = os.path.dirname(sys.executable)
 else:
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    RES_DIR = os.path.dirname(os.path.abspath(__file__))
+    WORK_DIR = RES_DIR
 
-os.chdir(BASE_DIR)
-sys.path.insert(0, BASE_DIR)
+os.chdir(RES_DIR)
+sys.path.insert(0, RES_DIR)
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
@@ -22,7 +26,8 @@ from ui.floating_window import FloatingWindow
 
 
 def setup_logging():
-    log_dir = os.path.join(BASE_DIR, "logs")
+    # Log to the work dir (next to exe, or project root for dev)
+    log_dir = os.path.join(WORK_DIR, "logs")
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, "game_bot.log")
 
@@ -43,9 +48,17 @@ def main():
 
     setup_logging()
     logger = logging.getLogger("main")
+    logger.info(f"RES_DIR={RES_DIR}, WORK_DIR={WORK_DIR}")
 
-    config = ConfigManager(BASE_DIR)
-    engine = ClickEngine(config, BASE_DIR)
+    # For exe: copy bundled settings.json to writable work dir on first run
+    work_settings = os.path.join(WORK_DIR, "settings.json")
+    bundled_settings = os.path.join(RES_DIR, "settings.json")
+    if getattr(sys, 'frozen', False) and not os.path.exists(work_settings):
+        shutil.copy(bundled_settings, work_settings)
+        logger.info("Initialized settings.json in work directory")
+
+    config = ConfigManager(WORK_DIR)
+    engine = ClickEngine(config, RES_DIR)
 
     # Pre-load all templates
     actions = config.actions
