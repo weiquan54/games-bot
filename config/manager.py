@@ -10,6 +10,8 @@ DEFAULT_CONFIG = {
     "baseline_height": 0,
     "actions": [],
     "round_interval": 10,
+    "wake_delay": 3,
+    "screen_off_delay": 0,
     "window_geometry": {"x": 100, "y": 100, "collapsed": False},
 }
 
@@ -53,6 +55,24 @@ class ConfigManager:
     @round_interval.setter
     def round_interval(self, value: int):
         self._data["round_interval"] = max(1, int(value))
+        self.save()
+
+    @property
+    def wake_delay(self) -> int:
+        return self._data.get("wake_delay", 3)
+
+    @wake_delay.setter
+    def wake_delay(self, value: int):
+        self._data["wake_delay"] = max(0, int(value))
+        self.save()
+
+    @property
+    def screen_off_delay(self) -> int:
+        return self._data.get("screen_off_delay", 0)
+
+    @screen_off_delay.setter
+    def screen_off_delay(self, value: int):
+        self._data["screen_off_delay"] = max(0, int(value))
         self.save()
 
     @property

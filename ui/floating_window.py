@@ -151,6 +151,26 @@ class FloatingWindow(QWidget):
         row_rint.addStretch()
         cfg.addLayout(row_rint)
 
+        # Wake delay row
+        row_wake = QHBoxLayout()
+        row_wake.addWidget(QLabel("唤醒延迟:"))
+        self.wake_delay_edit = QLineEdit(str(self.config.wake_delay))
+        self.wake_delay_edit.setFixedWidth(50)
+        row_wake.addWidget(self.wake_delay_edit)
+        row_wake.addWidget(QLabel("秒"))
+        row_wake.addStretch()
+        cfg.addLayout(row_wake)
+
+        # Screen off delay row
+        row_off = QHBoxLayout()
+        row_off.addWidget(QLabel("关屏延迟:"))
+        self.screen_off_delay_edit = QLineEdit(str(self.config.screen_off_delay))
+        self.screen_off_delay_edit.setFixedWidth(50)
+        row_off.addWidget(self.screen_off_delay_edit)
+        row_off.addWidget(QLabel("秒"))
+        row_off.addStretch()
+        cfg.addLayout(row_off)
+
         # ---- Action list header ----
         header = QHBoxLayout()
         header.addWidget(QLabel("点击顺序列表:"))
@@ -196,6 +216,8 @@ class FloatingWindow(QWidget):
 
         self.threshold_edit.editingFinished.connect(self._on_threshold_changed)
         self.round_interval_edit.editingFinished.connect(self._on_round_interval_changed)
+        self.wake_delay_edit.editingFinished.connect(self._on_wake_delay_changed)
+        self.screen_off_delay_edit.editingFinished.connect(self._on_screen_off_delay_changed)
         self.action_list.model().rowsMoved.connect(self._on_list_reordered)
 
     def _restore_geometry(self):
@@ -219,7 +241,7 @@ class FloatingWindow(QWidget):
         if self._collapsed:
             self.setFixedHeight(90)  # taller to fit 2-row status
         else:
-            self.setFixedHeight(350)
+            self.setFixedHeight(420)
         self.config.collapsed = self._collapsed
 
     def _toggle_collapse(self):
@@ -385,6 +407,20 @@ class FloatingWindow(QWidget):
             self.config.round_interval = val
         except ValueError:
             self.round_interval_edit.setText(str(self.config.round_interval))
+
+    def _on_wake_delay_changed(self):
+        try:
+            val = int(self.wake_delay_edit.text())
+            self.config.wake_delay = val
+        except ValueError:
+            self.wake_delay_edit.setText(str(self.config.wake_delay))
+
+    def _on_screen_off_delay_changed(self):
+        try:
+            val = int(self.screen_off_delay_edit.text())
+            self.config.screen_off_delay = val
+        except ValueError:
+            self.screen_off_delay_edit.setText(str(self.config.screen_off_delay))
 
     # ---- Status update ----
 
