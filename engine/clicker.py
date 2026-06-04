@@ -266,14 +266,14 @@ class ClickEngine:
             self._allow_lock()
 
     def _wake_display(self):
-        """Force display ON — synchronous SendMessage, then key events."""
+        """Force display ON — async PostMessage + key events."""
         try:
             HWND_BROADCAST = 0xFFFF
             WM_SYSCOMMAND = 0x0112
             SC_MONITORPOWER = 0xF170
-            result = ctypes.windll.user32.SendMessageW(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1)
+            result = ctypes.windll.user32.PostMessageW(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1)
             if result == 0:
-                logger.warning("SendMessage(SC_MONITORPOWER) returned 0 — display may not have woken")
+                logger.warning("PostMessage(SC_MONITORPOWER, -1) failed")
             time.sleep(0.5)
             win32api.keybd_event(win32con.VK_SCROLL, 0, 0, 0)
             time.sleep(0.05)
