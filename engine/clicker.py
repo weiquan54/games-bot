@@ -182,7 +182,10 @@ class ClickEngine:
                                 result = match_template(frame, template, self.config.threshold, sf)
                                 if result is not None:
                                     cx, cy = result
-                                    pyautogui.click(cx, cy)
+                                    win32api.SetCursorPos((cx, cy))
+                                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+                                    time.sleep(0.03)
+                                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
                                     self.status = "clicked"
                                     logger.info(f"[{action['name']}] Clicked at ({cx}, {cy})")
                                     found = True
