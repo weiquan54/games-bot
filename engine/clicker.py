@@ -182,19 +182,41 @@ class ClickEngine:
                                 result = match_template(frame, template, self.config.threshold, sf)
                                 if result is not None:
                                     cx, cy = result
-                                    # Move and click via SetCursorPos + mouse_event with absolute coords
+                                    # SendInput mouse click — hardware-level injection
+                                    class MOUSEINPUT(ctypes.Structure):
+                                        _fields_ = [
+                                            ("dx", ctypes.c_long), ("dy", ctypes.c_long),
+                                            ("mouseData", ctypes.c_ulong), ("dwFlags", ctypes.c_ulong),
+                                            ("time", ctypes.c_ulong),
+                                            ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong)),
+                                        ]
+                                    class INPUT(ctypes.Structure):
+                                        _fields_ = [
+                                            ("type", ctypes.c_ulong), ("mi", MOUSEINPUT),
+                                        ]
                                     screen_w = win32api.GetSystemMetrics(0)
                                     screen_h = win32api.GetSystemMetrics(1)
-                                    abs_x = int(cx * 65535 / screen_w)
-                                    abs_y = int(cy * 65535 / screen_h)
-                                    win32api.mouse_event(
-                                        win32con.MOUSEEVENTF_ABSOLUTE | win32con.MOUSEEVENTF_MOVE,
-                                        abs_x, abs_y, 0, 0
-                                    )
+                                    abs_x = int(cx * 65536 / screen_w)
+                                    abs_y = int(cy * 65536 / screen_h)
+                                    INPUT_MOUSE = 0
+                                    MOUSEEVENTF_ABSOLUTE = 0x8000
+                                    MOUSEEVENTF_MOVE = 0x0001
+                                    MOUSEEVENTF_LEFTDOWN = 0x0002
+                                    MOUSEEVENTF_LEFTUP = 0x0004
+                                    # Move
+                                    inp = INPUT()
+                                    inp.type = INPUT_MOUSE
+                                    inp.mi.dx, inp.mi.dy = abs_x, abs_y
+                                    inp.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE
+                                    ctypes.windll.user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
                                     time.sleep(0.01)
-                                    win32api.mouse_event(win32con.MOUSEEVENTF_ABSOLUTE | win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+                                    # Down
+                                    inp.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN
+                                    ctypes.windll.user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
                                     time.sleep(0.05)
-                                    win32api.mouse_event(win32con.MOUSEEVENTF_ABSOLUTE | win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+                                    # Up
+                                    inp.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTUP
+                                    ctypes.windll.user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
                                     self.status = "clicked"
                                     logger.info(f"[{action['name']}] Clicked at ({cx}, {cy})")
                                     found = True
